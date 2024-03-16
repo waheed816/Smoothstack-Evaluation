@@ -1,9 +1,9 @@
 """Import flask to create an instance of flask and render_template to use html files"""
 from datetime import datetime
-from flask import Flask, render_template, flash, redirect, url_for, abort, session
+from flask import Flask, render_template, flash, redirect, url_for #, abort, session
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, EmailField
-from wtforms import PasswordField, BooleanField, ValidationError
+from wtforms import PasswordField #, BooleanField, ValidationError
 from wtforms.validators import DataRequired, EqualTo, Length, Email
 from wtforms_validators import AlphaNumeric
 from flask_sqlalchemy import SQLAlchemy
@@ -11,8 +11,8 @@ from flask_migrate import Migrate
 from sqlalchemy import MetaData
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, login_user, LoginManager
-from flask_login import login_required, logout_user, current_user
-import logging
+from flask_login import logout_user, current_user #, login_required
+#import logging
 #Create Flask Instance
 app = Flask(__name__)
 
@@ -37,8 +37,6 @@ metadata = MetaData(naming_convention=convention)
 db = SQLAlchemy(app, metadata=metadata)
 
 migrate = Migrate(app, db, render_as_batch=True)
-
-
 
 class Users(db.Model, UserMixin):
     '''Create Users Model'''
@@ -77,28 +75,31 @@ def index():
     """Function rendering index.html template for default route"""
     return render_template("index.html")
 
-@app.route('/clear_session', methods=['POST'])
-def clear_session():
-    # Clear the session data
-    session.clear()
-    return '', 204
+# @app.route('/clear_session', methods=['POST'])
+# def clear_session():
+#     # Clear the session data
+#     session.clear()
+#     return '', 204
 
 #Create User Form
 class UserForm(FlaskForm):
     '''Form for adding new users'''
     username = StringField("Username",
         validators = [DataRequired(message = 'Username is required.'),
-                      Length(min=5,max=30, message = "Username must be between 5 and 30 characters."),
-                      AlphaNumeric(message = 'Username can only be alphabets and numbers with no spaces.')])
+                      Length(min=5,max=30,
+                             message="Username must be between 5 and 30 characters."),
+                      AlphaNumeric(
+                            message='Username can only be alphabets and numbers with no spaces.')])
     email = EmailField("Email",
-                        validators = [DataRequired(message = "Email is required."),
-                                      Email()])
+            validators = [DataRequired(message = "Email is required."), Email()])
     hashed_password = PasswordField('Password',
-                                    validators=[DataRequired(message = 'Password is required.'),
-                                                Length(min=5,max=20, message = "Password must be between 5 and 20 characters.")])
+                    validators=[DataRequired(message = 'Password is required.'),
+                                Length(min=5,max=20,
+                                        message = "Password must be between 5 and 20 characters.")])
     confirm_password = PasswordField('Confirm Password',
                         validators=[DataRequired(message = 'Password confirmation required.'),
-                                    EqualTo('hashed_password', message='Field must be equal to password.')])
+                                    EqualTo('hashed_password',
+                                            message='Field must be equal to password.')])
     submit = SubmitField("Sign Up")
 
 #Create Registration Route
@@ -125,7 +126,7 @@ def add_user():
 
         #print(">>>>", form.errors)
 
-        if not len(form.errors):
+        if len(form.errors) == 0:
             #print(">>>>>>>>>", form.hashed_password.data)
             password_hash = generate_password_hash(form.hashed_password.data)
             new_user = Users(email=form.email.data, username=form.username.data,
@@ -142,13 +143,18 @@ def add_user():
     return render_template("register_user.html", form=form)
 
 #Create @login_required functionality
+#create an instance of LoginManager class
 login_manager = LoginManager()
+#initialize the instance with our flask application instance
 login_manager.init_app(app)
+#let login_manager know where our login function is located
 login_manager.login_view = 'login'
 
 @login_manager.user_loader
 def load_user(user_id):
+    '''Load the user object from the user ID stored in the session'''
     return db.session.get(Users, int(user_id))
+    # return Users.query.get(int(user_id))
 
 #Create Login Form
 class LoginForm(FlaskForm):
@@ -178,8 +184,8 @@ def login():
                 login_user(user, remember=False)
                 flash("You Have Been Logged In!", 'success')
                 return redirect(url_for('index'))
-            else:
-                form.password.errors.append("Incorrect password.")
+
+            form.password.errors.append("Incorrect password.")
         else:
             form.email.errors.append("Email address is not registered.")
 
@@ -193,9 +199,9 @@ def logout():
         logout_user()
         flash("You Have Been Logged Out.", 'success')
         return redirect(url_for('index'))
-    else:
-        flash("You Cannot Logout Without Logging In.")
-        return redirect(url_for('login'))
+
+    flash("You Cannot Logout Without Logging In.")
+    return redirect(url_for('login'))
 
 #Create Exception Handler route
 @app.errorhandler(Exception)

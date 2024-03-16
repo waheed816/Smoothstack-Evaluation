@@ -216,15 +216,14 @@ def test_no_email_registration(client):
         user = Users.query.filter_by(username='testuser').first()
         assert user is None
 
-def test_invalid_email_format_registration(client):
-    """Test that registration is invalid with invalid email format"""
-
+def test_normal_string_email_registration(client):
+    '''Test that registration is invalid with normal string email'''
     #Delete test user incase assertion error happens before user is deleted
     with app.app_context():
         Users.query.filter_by(email='test@example.com').delete()
         db.session.commit()
 
-    #Check that email with no @ symbol is not allowed to register
+    #Check that email with normal string input is not allowed to register
     normal_string_email_data = {
         'username': 'testuser',
         'email': 'normalStringEmail123',
@@ -249,6 +248,14 @@ def test_invalid_email_format_registration(client):
         user = Users.query.filter_by(username='testuser').first()
         assert user is None
 
+def test_invalid_email_format_registration(client):
+    """Test that registration is invalid with invalid email format"""
+
+    #Delete test user incase assertion error happens before user is deleted
+    with app.app_context():
+        Users.query.filter_by(email='test@example.com').delete()
+        db.session.commit()
+
     #Check that email with no @ symbol is not allowed to register
     no_at_email_data = {
         'username': 'testuser',
@@ -262,7 +269,7 @@ def test_invalid_email_format_registration(client):
     #Check that correct error message is displayed on the frontend
     assert b'Invalid email address.' in response.data
 
-    #Check that user stays on registration page
+
     assert response.request.path == '/register'
 
     #Check that user was not added to database
