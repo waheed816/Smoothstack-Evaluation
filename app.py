@@ -17,7 +17,7 @@ from flask_login import logout_user, current_user #, login_required
 app = Flask(__name__)
 
 #Add Database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///flask_core.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///flask_blog.db'
 
 #Add Secret Key to Guard against CSRF attacks using forms
 app.config['SECRET_KEY'] = "my secret key"
