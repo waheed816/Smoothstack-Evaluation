@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<center>
+    <div class="alert alert-danger alert-link" styrole="alert" style="width: 35%; font-size: larger;">
+        <center>{{code}} ERROR</center>
+        <center>{{name|upper}}</center>
+
+    </div>
+    <div class="alert alert-danger alert-link" role="alert" style="width: 35%; font-size: larger;">
+        <center>{{description}}</center>
+    </div>
+</center>
+{% endblock %}

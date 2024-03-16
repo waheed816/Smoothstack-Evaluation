@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% if current_user.is_authenticated %}
+
+
+<div class="container" style="background-color: white;">
+    <h5 id="check-circle-fill" class="alert alert-success alert-dismissible fade show" role="alert" style="color: green; margin-bottom: none;">You Are Already Logged In!</h5>
+</div>
+
+{% else %}
+
+<div class="border container shadow p-3" style="background-color: white;">
+
+    <h2 style="border-bottom: 1px solid black; margin-top: 7px;">Log In</h2>
+    <br/>
+
+
+
+        <form method="POST" novalidate>
+
+                {{ form.hidden_tag() }}
+
+                {% for message in get_flashed_messages() %}
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+
+                {{ form.email.label(
+                    class="form-label") }}
+                <br/>
+
+                {{ form.email(
+                    class="form-control",
+                    style="border-color: red;" if form.errors.email else "")
+
+                }}
+
+                {% if form.errors.email %}
+                    <p style="color: red; font-size: x-small; margin-top: 3px; margin-bottom: 0; padding-bottom: 0;">
+                        {{ form.errors.email[0] }}
+                    </p>
+                {% endif %}
+                <br/>
+
+                {{ form.password.label(
+                    class="form-label") }}
+                <br/>
+
+                {{ form.password(
+                    class="form-control",
+                    style="border-color: red;" if form.errors.password else "")
+                }}
+
+                {% if form.errors.password %}
+                    <p style="color: red; font-size: x-small; margin-top: 3px; margin-bottom: 0; padding-bottom: 0;">
+                        {{ form.errors.password[0] }}
+                    </p>
+                {% endif %}
+                <br/>
+
+                {{ form.submit(
+                    class="btn btn-light", style="border-color: rgba(82,186,202,255); color: rgba(82,186,202,255)") }}
+                <br/>
+                <br/>
+        </form>
+
+</div>
+    <br/>
+    Need An Account? &nbsp;&nbsp; <a href="{{url_for('add_user')}}" style="text-decoration: none;">Sign Up Now</a>
+    <br/>
+    <br/>
+
+    {% endif %}
+
+
+{% endblock %}

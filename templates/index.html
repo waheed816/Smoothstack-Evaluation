@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+    {% for message in get_flashed_messages() %}
+        <center>
+            <div class="alert alert-warning alert-dismissible fade show" role="alert" style="width: fit-content;">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </center>
+    {% endfor %}
+
+    <br/>
+    <center>
+        <h2 id="check-circle-fill" class="alert alert-dark fade show" role="alert" style="color: rgba(97,120,140,255); margin-bottom: none; width: fit-content;">
+            Homepage for Flask Core Assignment
+        </h2>
+    </center>
+
+
+
+
+{% endblock %}
