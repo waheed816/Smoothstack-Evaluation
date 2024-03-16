@@ -32,13 +32,16 @@ def test_valid_user_registration(client):
     response = client.post('/register', data=valid_user_data, follow_redirects=True)
     assert b'Registration Successful!' in response.data
 
+    #Check that user is redirected to login page after successful registration
+    assert response.request.path == '/login'
+
     #Check if the user was added to the database
     with app.app_context():
         user = Users.query.filter_by(username='testuser').first()
         assert user is not None
         assert user.email == 'test@example.com'
 
-    #Check that test user login is successful after registration on the front end
+    #Check that test user login is successful with the email and password they created
     valid_user = {
         'email':'test@example.com',
         'password':'testpassword'
@@ -48,6 +51,9 @@ def test_valid_user_registration(client):
 
     #Check that correct login message is displayed on the frontend
     assert b'You Have Been Logged In!' in response.data
+
+    #Check that user is redirected to homepage after successful login
+    assert response.request.path == '/home'
 
     #Check that the user is logged in
     assert current_user.is_authenticated is True
@@ -84,6 +90,9 @@ def test_no_username_registration(client):
     response = client.post('/register', data=no_username_data, follow_redirects=True)
     assert b'Username is required.' in response.data
 
+    #Check that user stays on registration page
+    assert response.request.path == '/register'
+
     #Check that user was not added to database
     with app.app_context():
         user = Users.query.filter_by(email='test@example.com').first()
@@ -113,6 +122,9 @@ def test_invalid_format_username_registration(client):
 
     assert b'Username can only be alphabets and numbers with no spaces.' in response.data
 
+    #Check that user stays on registration page
+    assert response.request.path == '/register'
+
     #Check that user was not added to database
     with app.app_context():
         user = Users.query.filter_by(email='test@example.com').first()
@@ -131,6 +143,9 @@ def test_invalid_format_username_registration(client):
     }
 
     response = client.post('/register', data=short_username_data, follow_redirects=True)
+
+    #Check that user stays on registration page
+    assert response.request.path == '/register'
 
     #Check that correct error message is displayed on the frontend
     assert b'Username must be between 5 and 30 characters.' in response.data
@@ -156,6 +171,9 @@ def test_invalid_format_username_registration(client):
 
     #Check that correct error message is displayed on the frontend
     assert b'Username must be between 5 and 30 characters.' in response.data
+
+    #Check that user stays on registration page
+    assert response.request.path == '/register'
 
     #Check that user was not added to database
     with app.app_context():
@@ -185,6 +203,9 @@ def test_no_email_registration(client):
     #Check that registration was not successful on frontend
     response = client.post('/register', data=no_username_data, follow_redirects=True)
     assert b'Email is required.' in response.data
+
+    #Check that user stays on registration page
+    assert response.request.path == '/register'
 
     #Check that user was not added to database
     with app.app_context():
@@ -216,6 +237,9 @@ def test_invalid_email_format_registration(client):
     #Check that correct error message is displayed on the frontend
     assert b'Invalid email address.' in response.data
 
+    #Check that user stays on registration page
+    assert response.request.path == '/register'
+
     #Check that user was not added to database
     with app.app_context():
         user = Users.query.filter_by(email='NormalStringEmail123').first()
@@ -238,6 +262,9 @@ def test_invalid_email_format_registration(client):
     #Check that correct error message is displayed on the frontend
     assert b'Invalid email address.' in response.data
 
+    #Check that user stays on registration page
+    assert response.request.path == '/register'
+
     #Check that user was not added to database
     with app.app_context():
         user = Users.query.filter_by(email='testATemail.com').first()
@@ -258,6 +285,9 @@ def test_invalid_email_format_registration(client):
     #Check that registration was not successful on frontend
     response = client.post('/register', data=no_dot_email_data, follow_redirects=True)
     assert b'Invalid email address.' in response.data
+
+    #Check that user stays on registration page
+    assert response.request.path == '/register'
 
     #Check that user was not added to database
     with app.app_context():
@@ -280,6 +310,9 @@ def test_invalid_email_format_registration(client):
     response = client.post('/register', data=nothing_after_dot_email_data, follow_redirects=True)
     assert b'Invalid email address.' in response.data
 
+    #Check that user stays on registration page
+    assert response.request.path == '/register'
+
     #Check that user was not added to database
     with app.app_context():
         user = Users.query.filter_by(email='test@example.').first()
@@ -300,6 +333,9 @@ def test_invalid_email_format_registration(client):
     #Check that registration was not successful on frontend
     response = client.post('/register', data=email_with_space_data, follow_redirects=True)
     assert b'Invalid email address.' in response.data
+
+    #Check that user stays on registration page
+    assert response.request.path == '/register'
 
     #Check that user was not added to database
     with app.app_context():
@@ -330,6 +366,9 @@ def test_no_password_registration(client):
     response = client.post('/register', data=no_password_data, follow_redirects=True)
     assert b'Password is required.' in response.data
 
+    #Check that user stays on registration page
+    assert response.request.path == '/register'
+
     #Check that user was not added to database
     with app.app_context():
         user = Users.query.filter_by(email='test@example.com').first()
@@ -359,6 +398,9 @@ def test_invalid_password_registration(client):
     response = client.post('/register', data=long_password_data, follow_redirects=True)
     assert b'Password must be between 5 and 20 characters.' in response.data
 
+    #Check that user stays on registration page
+    assert response.request.path == '/register'
+
     #Check that user was not added to database
     with app.app_context():
         user = Users.query.filter_by(email='test@example.com').first()
@@ -379,6 +421,9 @@ def test_invalid_password_registration(client):
     #Check that registration was not successful on frontend
     response = client.post('/register', data=short_password_data, follow_redirects=True)
     assert b'Password must be between 5 and 20 characters.' in response.data
+
+    #Check that user stays on registration page
+    assert response.request.path == '/register'
 
     #Check that user was not added to database
     with app.app_context():
@@ -408,6 +453,9 @@ def test_no_confirm_password_registration(client):
     response = client.post('/register', data=no_confirm_password_data, follow_redirects=True)
     assert b'Password confirmation required.' in response.data
 
+    #Check that user stays on registration page
+    assert response.request.path == '/register'
+
     #Check that user was not added to database
     with app.app_context():
         user = Users.query.filter_by(email='test@example.com').first()
@@ -435,6 +483,9 @@ def test_non_matching_passwords_registration(client):
     #Check that registration was not successful on frontend
     response = client.post('/register', data=non_matching_password_data, follow_redirects=True)
     assert b'Field must be equal to password.' in response.data
+
+    #Check that user stays on registration page
+    assert response.request.path == '/register'
 
     #Check that user was not added to database
     with app.app_context():

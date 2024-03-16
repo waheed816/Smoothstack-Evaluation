@@ -64,6 +64,9 @@ def test_invalid_password(client):
 
     response = client.post('/login', data=invalid_password_user, follow_redirects=True)
 
+    #Check that user stays on the login page
+    assert response.request.path == '/login'
+
     #Check that correct error message is displayed on the frontend
     assert b'Incorrect password.' in response.data
 
@@ -81,6 +84,9 @@ def test_invalid_email(client):
     #Check that correct error message is displayed on the frontend
     assert b'Invalid email address.' in response.data
 
+    #Check that user stays on the login page
+    assert response.request.path == '/login'
+
     #Check that there is no logged in user
     assert current_user.is_authenticated is False
 
@@ -95,6 +101,9 @@ def test_unregistered_email(client):
 
     #Check that correct error message is displayed on the frontend
     assert b'Email address is not registered.' in response.data
+
+    #Check that user stays on the login page
+    assert response.request.path == '/login'
 
     #Check that there is no logged in user
     assert current_user.is_authenticated is False
@@ -114,6 +123,9 @@ def test_multiple_login(client):
 
     #Check that correct login message is displayed on the frontend
     assert b'You Are Already Logged In!' in response.data
+
+    #Check that user is redirected to homepage
+    assert response.request.path == '/home'
 
     #Check that the user is logged in
     assert current_user.is_authenticated is True
@@ -139,6 +151,9 @@ def test_logout(client):
     #Check that correct logout message is displayed on the frontend
     assert b'You Have Been Logged Out.' in response.data
 
+    #Check that user is redirected to homepage
+    assert response.request.path == '/home'
+
     #Check that there is no logged in user
     assert current_user.is_authenticated is False
 
@@ -157,11 +172,17 @@ def test_multiple_logouts(client):
     #Check that correct first logout message is displayed on the frontend
     assert b'You Have Been Logged Out.' in response.data
 
+    #Check that user is redirected to homepage
+    assert response.request.path == '/home'
+
     #Check that there is no logged in user
     assert current_user.is_authenticated is False
 
     #Another logout
     response = client.get('/logout', follow_redirects=True)
+
+    #Check that user is redirected to login page if attempting multiple logouts
+    assert response.request.path == '/login'
 
     #Check that correct multiple logout message is displayed
     assert b'You Cannot Logout Without Logging In.' in response.data
