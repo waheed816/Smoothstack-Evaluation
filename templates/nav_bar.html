@@ -9,6 +9,9 @@
           <li class="nav-item">
             <a class="nav-link active" aria-current="page" style="color:white;" href="{{url_for('index')}}">Home</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" style="color:white;" href="{{url_for('about')}}">About</a>
+          </li>
         </ul>
         <ul class="navbar-nav" style="list-style-type: none;">
             {% if current_user.is_authenticated %}

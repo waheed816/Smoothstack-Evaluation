@@ -1,5 +1,4 @@
 '''Tests for registering a new user'''
-
 import pytest
 from flask_login import current_user
 from app import app, db, Users

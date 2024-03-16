@@ -50,7 +50,7 @@ class Users(db.Model, UserMixin):
     #Defining a password property
     def password(self):
         '''Make sure password cannot be accessed'''
-        raise AttributeError('password is not a readable attribute')
+        raise AttributeError('Password is not a readable attribute')
 
     @password.setter
     #Definiing a setter method on password property
@@ -80,6 +80,12 @@ def index():
 #     # Clear the session data
 #     session.clear()
 #     return '', 204
+
+#Create route for about page
+@app.route("/about")
+def about():
+    """Function rendering about page"""
+    return render_template("about.html")
 
 #Create User Form
 class UserForm(FlaskForm):
