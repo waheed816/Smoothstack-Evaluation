@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% if current_user.is_authenticated == false %}
+
+
+    <div class="border container shadow p-3" style="background-color: white;">
+        <h3 class="alert alert-warning fade show" role="alert">
+            You Must Login to Create a Blog.
+        </h3>
+        <a class="btn btn-light", style="border-color: rgba(82,186,202,255); color: rgba(82,186,202,255)" href="{{ url_for('login') }}">Login</a>
+    </div>
+
+{% else %}
+
+<div class="border container shadow p-4" style="background-color: white;">
+
+    <h2 style="border-bottom: 1px solid black;">Create New Blog</h2>
+    <br/>
+    <form method="POST" novalidate>
+
+        {{ form.hidden_tag() }}
+
+        {{form.blog_title.label(
+            class="form-label") }}
+
+        {{form.blog_title(
+            class="form-control",
+            style="border-color: red;" if form.errors.blog_title else "")
+        }}
+
+        {% if form.errors.blog_title %}
+            <p style="color: red; font-size: x-small; margin-top: 3px; margin-bottom: 0; padding-bottom: 0;">
+                {{ form.errors.blog_title[0] }}
+            </p>
+        {% endif %}
+
+       <br/>
+
+
+       {{form.blog_content.label(
+        class="form-label") }}
+        {{form.blog_content(
+            class="form-control", rows="10",
+            style="border-color: red;" if form.errors.blog_content else "")
+        }}
+
+        {% if form.errors.blog_content %}
+            <p style="color: red; font-size: x-small; margin-top: 3px; margin-bottom: 0; padding-bottom: 0;">
+                {{ form.errors.blog_content[0] }}
+            </p>
+        {% endif %}
+
+        {{form.submit(
+            class="btn btn-light", style="border-color: rgba(82,186,202,255); color: rgba(82,186,202,255); margin-top: 13px;") }}
+        <br/>
+
+    </form>
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+
+
+{% endif %}
+
+{% endblock %}

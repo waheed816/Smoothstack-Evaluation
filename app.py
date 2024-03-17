@@ -2,7 +2,7 @@
 from datetime import datetime
 from flask import Flask, render_template, flash, redirect, url_for #, abort, session
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, EmailField
+from wtforms import StringField, SubmitField, EmailField, TextAreaField
 from wtforms import PasswordField #, BooleanField, ValidationError
 from wtforms.validators import DataRequired, EqualTo, Length, Email
 from wtforms_validators import AlphaNumeric
@@ -12,6 +12,8 @@ from sqlalchemy import MetaData
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, login_user, LoginManager
 from flask_login import logout_user, current_user #, login_required
+from wtforms.widgets import TextArea
+
 #import logging
 #Create Flask Instance
 app = Flask(__name__)
@@ -38,19 +40,29 @@ db = SQLAlchemy(app, metadata=metadata)
 
 migrate = Migrate(app, db, render_as_batch=True)
 
+class Blogs(db.Model):
+    '''Create Blogs Model'''
+    id = db.Column(db.Integer, primary_key=True)
+    blog_title = db.Column(db.String(100), nullable=False)
+    blog_content = db.Column(db.Text, nullable=False)
+    date_posted = db.Column(db.DateTime, default=datetime.now())
+    author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
 class Users(db.Model, UserMixin):
     '''Create Users Model'''
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), nullable=False, unique=True)
     email = db.Column(db.String(100), nullable=False, unique=True)
     hashed_password = db.Column(db.String(500), nullable=False)
-    date_added = db.Column(db.DateTime, default = datetime.utcnow)
+    date_added = db.Column(db.DateTime, default = datetime.now())
+    blogs = db.relationship('Blogs', backref='author')
 
     @property
     #Defining a password property
     def password(self):
         '''Make sure password cannot be accessed'''
         raise AttributeError('Password is not a readable attribute')
+
 
     @password.setter
     #Definiing a setter method on password property
@@ -63,6 +75,7 @@ class Users(db.Model, UserMixin):
         return check_password_hash(self.hashed_password, password)
 
 
+
 #Specify app context and create database
 with app.app_context():
     db.create_all()
@@ -73,7 +86,10 @@ with app.app_context():
 @app.route("/home")
 def index():
     """Function rendering index.html template for default route"""
-    return render_template("index.html")
+    blogs = Blogs.query.order_by(Blogs.date_posted)
+    users_with_blogs = Users.query.filter(Users.blogs.any()).all()
+    #print(">>>", users_with_blogs[0].username)
+    return render_template("index.html", blogs=blogs, users_with_blogs=users_with_blogs)
 
 # @app.route('/clear_session', methods=['POST'])
 # def clear_session():
@@ -208,6 +224,42 @@ def logout():
 
     flash("You Cannot Logout Without Logging In.")
     return redirect(url_for('login'))
+
+class PostForm(FlaskForm):
+    blog_title = StringField('Blog Title',
+                            validators=[DataRequired(message="Title Cannot Be Blank"),
+                                        Length(min=5, max=20,
+                                                message="Title Must Be Between 5 and 20 Characters")])
+
+    blog_content = TextAreaField('Blog Content',
+                            validators=[DataRequired(message="Blog cannot be blank"),
+                                        Length(min=10,
+                                                message="Blog Must Be At Least 10 Characters Long")])
+    submit = SubmitField("Submit")
+
+#Create route for posting a blog
+@app.route('/create-blog', methods=['GET', 'POST'])
+def create_blog():
+    '''Create Blog Function'''
+    form = PostForm()
+
+    if form.validate_on_submit():
+        #Create the post
+
+        post = Blogs(blog_title=form.blog_title.data, blog_content=form.blog_content.data, author_id=current_user.id)
+
+        #Clearn the form
+        form.blog_content.data = ''
+        form.blog_title.data = ''
+
+        #Add post to database
+        db.session.add(post)
+        db.session.commit()
+
+        flash("Blog Post Submitted Successfully!")
+
+    return render_template("create-blog.html", form=form)
+
 
 #Create Exception Handler route
 @app.errorhandler(Exception)

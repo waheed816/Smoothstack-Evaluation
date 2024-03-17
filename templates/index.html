@@ -4,21 +4,42 @@
 
 
     {% for message in get_flashed_messages() %}
-        <center>
             <div class="alert alert-warning alert-dismissible fade show" role="alert" style="width: fit-content;">
                 {{ message }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-        </center>
     {% endfor %}
 
-    <br/>
-    <center>
-        <h2 id="check-circle-fill" class="alert alert-dark fade show" role="alert" style="color: rgba(97,120,140,255); margin-bottom: none; width: fit-content;">
-            Homepage for Flask Blog Assignment
-        </h2>
-    </center>
+    {% for blog in blogs %}
+        <div class="border container shadow p-3" style="background-color: white;">
 
+            {% set author = None %}
+            {% for user in users_with_blogs %}
+                {{ user[blog.author_id] }}
+                {% if user.id == blog.author_id %}
+                    {% set author = user.username %}
+                    <div style= "font-size: small; border-bottom: 1px solid darkgray;">
+                            <strong style="text-transform: uppercase;">{{ author }}</strong>&nbsp;&nbsp;
+                            {{ blog.date_posted.strftime('%B %d, %Y') }}
+                    </div>
+                    {% set break_loop = true %}
+                {% endif %}
+            {% endfor %}
+                <div style="margin-top: 8px;">
+                    <h2 style="margin-bottom: 0; padding-bottom: 0; text-transform: capitalize;"> {{ blog.blog_title }} </h2>
+                </div>
+
+                <div style="white-space: pre-line; padding-top: 0;">
+                    {{ blog.blog_content.strip() | safe }}
+                </div>
+
+
+
+        </div>
+        <br/>
+    {% endfor %}
+        <br/>
+        <br/>
 
 
 

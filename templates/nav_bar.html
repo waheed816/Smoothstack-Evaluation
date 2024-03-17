@@ -1,4 +1,15 @@
-<nav class="navbar navbar-expand-lg" style="background-color: rgba(97,120,140,255);">
+<style>
+
+  .navbar-sticky{
+    position: sticky;
+    top: 0;
+    z-index: 101;
+  }
+
+</style>
+
+
+<nav class="navbar navbar-sticky navbar-expand-lg" style="background-color: rgba(97,120,140,255);">
     <div class="container container-fluid">
       <a class="navbar-brand" style="color:white" href="{{url_for('index')}}">Flask Blog</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">

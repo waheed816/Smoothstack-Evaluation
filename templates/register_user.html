@@ -5,12 +5,12 @@
 {% if current_user.is_authenticated %}
 
 
-<div class="border container shadow p-3" style="background-color: white;">
-    <h3 class="alert alert-warning fade show" role="alert">
-        You Must Logout to Register a New User.
-    </h3>
-    <a class="btn btn-light", style="border-color: rgba(82,186,202,255); color: rgba(82,186,202,255)" href="{{ url_for('logout') }}">Logout</a>
-</div>
+    <div class="border container shadow p-3" style="background-color: white;">
+        <h3 class="alert alert-warning fade show" role="alert">
+            You Must Logout to Register a New User.
+        </h3>
+        <a class="btn btn-light", style="border-color: rgba(82,186,202,255); color: rgba(82,186,202,255)" href="{{ url_for('logout') }}">Logout</a>
+    </div>
 
 {% else %}
 
@@ -96,10 +96,6 @@
             <br/>
         </form>
     </div>
-    <br/>
-    Already Have An Account? &nbsp;&nbsp; <a href="{{url_for('login')}}" style="text-decoration: none;">Sign In</a>
-    <br/>
-    <br/>
     <br/>
 
     {% endif %}

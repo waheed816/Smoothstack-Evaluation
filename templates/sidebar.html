@@ -10,10 +10,16 @@
     .inner-div:hover {
         background-color: rgba(97, 120, 140, 0.1); /* Change to the desired hover background color */
     }
+
+    .container-sidebar {
+        position: sticky;
+        top: 65px;
+        z-index: 100;
+    }
 </style>
-<div class="container border shadow p-2" style="background-color: white; border: 1px solid rgba(97, 120, 140, 0.1);">
+<div class="container container-sidebar border shadow p-2" style="background-color: white; border: 1px solid rgba(97, 120, 140, 0.1);">
     <div class="p-3 highlight-on-hover inner-div">
-        <a class="nav-link active" aria-current="page" style="color: rgba(97, 120, 140, 255);" href="{{url_for('index')}}">Create Blog</a>
+        <a class="nav-link active" aria-current="page" style="color: rgba(97, 120, 140, 255);" href="{{url_for('create_blog')}}">Create Blog</a>
     </div>
     <div class="p-3 highlight-on-hover inner-div">
         <a class="nav-link active" aria-current="page" style="color: rgba(97, 120, 140, 255);" href="{{url_for('index')}}">View My Blogs</a>
@@ -21,4 +27,12 @@
     <div class="p-3 highlight-on-hover inner-div">
         <a class="nav-link active" aria-current="page" style="color: rgba(97, 120, 140, 255);" href="{{url_for('index')}}">Edit My Blogs</a>
     </div>
+    <div class="p-3 highlight-on-hover inner-div">
+        <a class="nav-link active" aria-current="page" style="color: rgba(97, 120, 140, 255);" href="{{url_for('index')}}">Latest Blogs</a>
+    </div>
+    {% if current_user.is_authenticated and current_user.username == 'admin' %}
+        <div class="p-3 highlight-on-hover inner-div">
+            <a class="nav-link active" aria-current="page" style="color: rgba(97, 120, 140, 255);" href="{{url_for('index')}}">Admin Page</a>
+        </div>
+    {% endif %}
 </div>
