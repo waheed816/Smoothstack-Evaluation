@@ -32,7 +32,7 @@
     </div>
     {% if current_user.is_authenticated and current_user.username == 'admin' %}
         <div class="p-3 highlight-on-hover inner-div">
-            <a class="nav-link active" aria-current="page" style="color: rgba(97, 120, 140, 255);" href="{{url_for('index')}}">Admin Page</a>
+            <a class="nav-link active" aria-current="page" style="color: rgba(97, 120, 140, 255);" href="{{url_for('admin')}}">Admin Page</a>
         </div>
     {% endif %}
 </div>

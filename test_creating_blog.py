@@ -69,7 +69,7 @@ def test_creating_a_valid_blog(client):
     #Ensure that the title of the new blog is unique
     unique_title = 'Test' + str(datetime.now()).replace(" ", "")
 
-    print(">>>>", unique_title)
+    # print(">>>>", unique_title)
 
     #Create Valid Blog Data
     valid_blog_data = {
@@ -199,7 +199,7 @@ def test_creating_a_blog_with_no_content(client):
     #Ensure that the title of the new blog is unique
     unique_title = 'Test' + str(datetime.now()).replace(" ", "")
 
-    print(">>>>", unique_title)
+    # print(">>>>", unique_title)
 
     #Create Valid Blog Data
     no_content_blog_data = {
@@ -237,7 +237,7 @@ def test_creating_a_blog_with_short_content(client):
     #Ensure that the title of the new blog is unique
     unique_title = 'Test' + str(datetime.now()).replace(" ", "")
 
-    print(">>>>", unique_title)
+    # print(">>>>", unique_title)
 
     #Create Valid Blog Data
     short_content_blog_data = {

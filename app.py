@@ -1,6 +1,6 @@
 """Import flask to create an instance of flask and render_template to use html files"""
 from datetime import datetime
-from flask import Flask, render_template, flash, redirect, url_for, session #, abort, session
+from flask import Flask, render_template, flash, redirect, url_for #, abort, session
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, EmailField, TextAreaField
 from wtforms import PasswordField #, BooleanField, ValidationError
@@ -78,10 +78,9 @@ class Users(db.Model, UserMixin):
     #Defining a password to not allow password access
     def password(self):
         '''Make sure password cannot be accessed'''
-        raise AttributeError('Password is not a readable attribute')
+        raise AttributeError('Password cannot be accessed!')
 
     @password.setter
-    #Definiing a setter method on password property
     def set_password(self, password):
         '''Method to set a hashed password'''
         self.hashed_password = generate_password_hash(password)
@@ -89,7 +88,6 @@ class Users(db.Model, UserMixin):
     def verify_password(self, password):
         '''Method to check entered password against saved password'''
         return check_password_hash(self.hashed_password, password)
-
 
 
 #Specify app context and create database
@@ -112,6 +110,12 @@ def index():
 def about():
     """Function rendering about page"""
     return render_template("about.html")
+
+@app.route("/admin")
+def admin():
+    '''Admin Page'''
+    all_users = Users.query.all()
+    return render_template("admin.html", all_users=all_users)
 
 #Create User Form
 class UserForm(FlaskForm):
@@ -227,8 +231,10 @@ def login():
         if user:
             if check_password_hash(user.hashed_password, form.password.data):
                 login_user(user, remember=False)
-                SESSION_PERMANENT=False
                 flash("You Have Been Logged In!", 'success')
+                if current_user.username == 'admin':
+                    return redirect(url_for('admin'))
+
                 return redirect(url_for('index'))
 
             form.password.errors.append("Incorrect password.")

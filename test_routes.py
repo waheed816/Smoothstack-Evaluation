@@ -10,7 +10,7 @@ def client_fixture():
         yield client
 
 def test_about_route(client):
-    '''Test for about route'''
+    '''Test that about routes takes user to about page'''
     response = client.get('/about', follow_redirects=True)
 
     #Check that front end is displaying correct page
