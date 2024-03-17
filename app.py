@@ -1,6 +1,6 @@
 """Import flask to create an instance of flask and render_template to use html files"""
 from datetime import datetime
-from flask import Flask, render_template, flash, redirect, url_for #, abort, session
+from flask import Flask, render_template, flash, redirect, url_for, session #, abort, session
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, EmailField, TextAreaField
 from wtforms import PasswordField #, BooleanField, ValidationError
@@ -12,7 +12,6 @@ from sqlalchemy import MetaData
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, login_user, LoginManager
 from flask_login import logout_user, current_user #, login_required
-from wtforms.widgets import TextArea
 
 #import logging
 #Create Flask Instance
@@ -23,6 +22,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///flask_blog.db'
 
 #Add Secret Key to Guard against CSRF attacks using forms
 app.config['SECRET_KEY'] = "my secret key"
+
+app.config['ALLOW_RESTRICTED_ACCOUNTS'] = False
 
 #For Migrate Files Naming conventions
 convention = {
@@ -48,6 +49,22 @@ class Blogs(db.Model):
     date_posted = db.Column(db.DateTime, default=datetime.now())
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
+    def get_blog_by_id(self, blog_id):
+        '''Method to get a blog by its ID'''
+        blog = Blogs.query.filter_by(id=blog_id).first()
+        if blog is None:
+            return "There is no blog with that id"
+        return blog
+
+    def get_blogs_by_author(self, author_id):
+        '''Method to get all blogs by a specific author'''
+        blogs = Blogs.query.filter_by(author_id=author_id).all()
+        if not blogs:
+            return "There are no blogs for this author"
+        return blogs
+
+
+#UserMixin provides proper
 class Users(db.Model, UserMixin):
     '''Create Users Model'''
     id = db.Column(db.Integer, primary_key=True)
@@ -58,20 +75,19 @@ class Users(db.Model, UserMixin):
     blogs = db.relationship('Blogs', backref='author')
 
     @property
-    #Defining a password property
+    #Defining a password to not allow password access
     def password(self):
         '''Make sure password cannot be accessed'''
         raise AttributeError('Password is not a readable attribute')
 
-
     @password.setter
     #Definiing a setter method on password property
-    def password(self, password):
-        '''Generate a hashed version of password'''
+    def set_password(self, password):
+        '''Method to set a hashed password'''
         self.hashed_password = generate_password_hash(password)
 
-    def password_verification(self, password):
-        '''Verifies password entered matches hashed password '''
+    def verify_password(self, password):
+        '''Method to check entered password against saved password'''
         return check_password_hash(self.hashed_password, password)
 
 
@@ -90,12 +106,6 @@ def index():
     users_with_blogs = Users.query.filter(Users.blogs.any()).all()
     #print(">>>", users_with_blogs[0].username)
     return render_template("index.html", blogs=blogs, users_with_blogs=users_with_blogs)
-
-# @app.route('/clear_session', methods=['POST'])
-# def clear_session():
-#     # Clear the session data
-#     session.clear()
-#     return '', 204
 
 #Create route for about page
 @app.route("/about")
@@ -134,17 +144,31 @@ def add_user():
         return redirect(url_for('index'))
 
     form = UserForm()
+
+
+
     if form.validate_on_submit():
+
+        if not app.config.get('ALLOW_RESTRICTED_ACCOUNTS', False):
+            #Reserve testuser for testing purposes only
+            if form.username.data.lower() == 'testuser':
+                form.username.errors.append("This username is reserved.")
+                # return render_template("register_user.html", form=form)
+
+            #Reserve test@example.com for testing purposes only
+            if form.email.data.lower() == 'test@example.com':
+                form.email.errors.append("This email is reserved.")
+                # return render_template("register_user.html", form=form)
 
         username_check = Users.query.filter(Users.username.ilike(form.username.data)).first()
 
         if username_check:
-            form.username.errors.append("This username is already taken")
+            form.username.errors.append("This username is already taken.")
 
         user_email_check = Users.query.filter(Users.email.ilike(form.email.data)).first()
 
         if user_email_check and user_email_check.email.lower() == form.email.data.lower():
-            form.email.errors.append("This email is already registered")
+            form.email.errors.append("This email is already registered.")
 
         #print(">>>>", form.errors)
 
@@ -169,14 +193,13 @@ def add_user():
 login_manager = LoginManager()
 #initialize the instance with our flask application instance
 login_manager.init_app(app)
-#let login_manager know where our login function is located
+#let login_manager know what out login function is called
 login_manager.login_view = 'login'
 
 @login_manager.user_loader
 def load_user(user_id):
     '''Load the user object from the user ID stored in the session'''
     return db.session.get(Users, int(user_id))
-    # return Users.query.get(int(user_id))
 
 #Create Login Form
 class LoginForm(FlaskForm):
@@ -204,6 +227,7 @@ def login():
         if user:
             if check_password_hash(user.hashed_password, form.password.data):
                 login_user(user, remember=False)
+                SESSION_PERMANENT=False
                 flash("You Have Been Logged In!", 'success')
                 return redirect(url_for('index'))
 
@@ -225,38 +249,42 @@ def logout():
     flash("You Cannot Logout Without Logging In.")
     return redirect(url_for('login'))
 
-class PostForm(FlaskForm):
+class BlogForm(FlaskForm):
+    '''Create Blog Form'''
     blog_title = StringField('Blog Title',
-                            validators=[DataRequired(message="Title Cannot Be Blank"),
-                                        Length(min=5, max=20,
-                                                message="Title Must Be Between 5 and 20 Characters")])
+                validators=[DataRequired(message="Title Cannot Be Blank."),
+                            Length(min=5, max=35,
+                                    message="Title Must Be Between 5 and 35 Characters.")])
 
     blog_content = TextAreaField('Blog Content',
-                            validators=[DataRequired(message="Blog cannot be blank"),
-                                        Length(min=10,
-                                                message="Blog Must Be At Least 10 Characters Long")])
+                validators=[DataRequired(message="Blog cannot be blank."),
+                            Length(min=10,
+                                    message="Blog Must Be At Least 10 Characters Long.")])
     submit = SubmitField("Submit")
 
-#Create route for posting a blog
+#Create route for posting a new blog
 @app.route('/create-blog', methods=['GET', 'POST'])
 def create_blog():
     '''Create Blog Function'''
-    form = PostForm()
+    form = BlogForm()
 
     if form.validate_on_submit():
         #Create the post
 
-        post = Blogs(blog_title=form.blog_title.data, blog_content=form.blog_content.data, author_id=current_user.id)
+        blog = Blogs(blog_title=form.blog_title.data,
+                     blog_content=form.blog_content.data,
+                     author_id=current_user.id)
 
         #Clearn the form
         form.blog_content.data = ''
         form.blog_title.data = ''
 
         #Add post to database
-        db.session.add(post)
+        db.session.add(blog)
         db.session.commit()
 
         flash("Blog Post Submitted Successfully!")
+        return redirect(url_for('index'))
 
     return render_template("create-blog.html", form=form)
 

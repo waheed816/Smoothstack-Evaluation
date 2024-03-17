@@ -9,8 +9,76 @@ def client_fixture():
     """Create a test client for the Flask application."""
     app.config['TESTING'] = True
     app.config['WTF_CSRF_ENABLED'] = False
+    app.config['ALLOW_RESTRICTED_ACCOUNTS'] = True
     with app.test_client() as client:
         yield client
+
+def test_username_reserved_for_test_cannot_be_registerd(client):
+    '''Test that testuser username cannot be registered'''
+    #Change ALLOW_RESTRICTED_ACCOUNTS to False to put restriction on in app
+    app.config['ALLOW_RESTRICTED_ACCOUNTS'] = False
+
+    #Delete test user incase assertion error happens before user is deleted
+    with app.app_context():
+        Users.query.filter_by(email='test@example.com').delete()
+        db.session.commit()
+
+    #Create valid user with reserved 'testuser' username
+    valid_user_data = {
+        'username': 'testuser',
+        'email': 'test@example.com',
+        'hashed_password': 'testpassword',
+        'confirm_password': 'testpassword'
+    }
+
+    #Try to register with 'testuser' username
+    response = client.post('/register', data=valid_user_data, follow_redirects=True)
+
+    #Check that correct message is displayed on frontend
+    assert b'This username is reserved.' in response.data
+
+    #Check that testuser was not added to database
+    with app.app_context():
+        user = Users.query.filter_by(username='testuser').first()
+        assert user is None
+
+    with app.app_context():
+        user = Users.query.filter_by(email='test@example.com').first()
+        assert user is None
+
+
+def test_email_reserved_for_test_cannot_be_registerd(client):
+    '''Test that testuser username cannot be registered'''
+    #Change ALLOW_RESTRICTED_ACCOUNTS to False to put restriction on in app
+    app.config['ALLOW_RESTRICTED_ACCOUNTS'] = False
+
+    #Delete test user incase assertion error happens before user is deleted
+    with app.app_context():
+        Users.query.filter_by(email='test@example.com').delete()
+        db.session.commit()
+
+    #Create valid user with reserved 'test@example.com' email
+    valid_user_data = {
+        'username': 'testuser',
+        'email': 'test@example.com',
+        'hashed_password': 'testpassword',
+        'confirm_password': 'testpassword'
+    }
+
+    #Try to register wth 'test@example.com' email
+    response = client.post('/register', data=valid_user_data, follow_redirects=True)
+
+    #Check that correct message is displayed on frontend
+    assert b'This email is reserved.' in response.data
+
+    #Check that testuser was not added to database
+    with app.app_context():
+        user = Users.query.filter_by(email='test@example.com').first()
+        assert user is None
+
+    with app.app_context():
+        user = Users.query.filter_by(username='testuser').first()
+        assert user is None
 
 def test_valid_user_registration(client):
     """Test registration with valid user data."""
@@ -39,6 +107,7 @@ def test_valid_user_registration(client):
         user = Users.query.filter_by(username='testuser').first()
         assert user is not None
         assert user.email == 'test@example.com'
+        assert user.username == 'testuser'
 
     #Check that test user login is successful with the email and password they created
     valid_user = {
@@ -69,6 +138,89 @@ def test_valid_user_registration(client):
         Users.query.filter_by(email='test@example.com').delete()
         db.session.commit()
 
+def test_registering_user_with_registered_username(client):
+    '''Test that registration is unsuccessful with already registered username'''
+    #Delete test user incase assertion error happens before user is deleted
+    with app.app_context():
+        Users.query.filter_by(email='test@example.com').delete()
+        db.session.commit()
+
+    #Create valid user data
+    valid_user_data = {
+        'username': 'testuser',
+        'email': 'test@example.com',
+        'hashed_password': 'testpassword',
+        'confirm_password': 'testpassword'
+    }
+
+    #Check if registration was successful on the front end
+    response = client.post('/register', data=valid_user_data, follow_redirects=True)
+    assert b'Registration Successful!' in response.data
+
+    #Check that user is redirected to login page after successful registration
+    assert response.request.path == '/login'
+
+    #Check if the user was added to the database
+    with app.app_context():
+        user = Users.query.filter_by(username='testuser').first()
+        assert user is not None
+        assert user.email == 'test@example.com'
+        assert user.username == 'testuser'
+
+    #Logout User
+    client.get('/logout', follow_redirects=True)
+
+    #Try to register with same valid user data
+    response = client.post('/register', data=valid_user_data, follow_redirects=True)
+
+    assert b'This username is already taken.' in response.data
+
+    #Check that there is only 1 user in database with that username
+    with app.app_context():
+        user_count_with_specific_username = Users.query.filter_by(username='testuser').count()
+        assert user_count_with_specific_username == 1
+
+def test_registering_user_with_registered_email(client):
+    '''Test that registration is unsuccessful with already registered username'''
+    #Delete test user incase assertion error happens before user is deleted
+    with app.app_context():
+        Users.query.filter_by(email='test@example.com').delete()
+        db.session.commit()
+
+    #Create valid user data
+    valid_user_data = {
+        'username': 'testuser',
+        'email': 'test@example.com',
+        'hashed_password': 'testpassword',
+        'confirm_password': 'testpassword'
+    }
+
+    #Check if registration was successful on the front end
+    response = client.post('/register', data=valid_user_data, follow_redirects=True)
+    assert b'Registration Successful!' in response.data
+
+    #Check that user is redirected to login page after successful registration
+    assert response.request.path == '/login'
+
+    #Check if the user was added to the database
+    with app.app_context():
+        user = Users.query.filter_by(username='testuser').first()
+        assert user is not None
+        assert user.email == 'test@example.com'
+        assert user.username == 'testuser'
+
+    #Logout User
+    client.get('/logout', follow_redirects=True)
+
+    #Try to register with same valid user data
+    response = client.post('/register', data=valid_user_data, follow_redirects=True)
+
+    assert b'This email is already registered.' in response.data
+
+    #Check that there is only 1 user in database with that email
+    with app.app_context():
+        user_count_with_specific_email = Users.query.filter_by(email='test@example.com').count()
+        assert user_count_with_specific_email == 1
 
 def test_no_username_registration(client):
     """Test registration is invalid without username"""

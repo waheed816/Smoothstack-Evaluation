@@ -9,6 +9,7 @@ def client_fixture():
     ''''Setting test configuration'''
     app.config['TESTING'] = True
     app.config['WTF_CSRF_ENABLED'] = False
+    app.config['ALLOW_RESTRICTED_ACCOUNTS'] = True
     #Create test Client
     with app.test_client() as client:
         with app.app_context():
@@ -53,6 +54,37 @@ def test_valid_login(client):
 
     #Logout User
     client.get('/logout', follow_redirects=False)
+
+def test_logged_in_registration_attempt(client):
+    '''Test that logged in user cannot register new user'''
+    valid_user = {
+        'email':'test@example.com',
+        'password':'testpassword'
+        }
+
+    response = client.post('/login', data=valid_user, follow_redirects=True)
+
+    #Check that user is redirected to /home after successful login
+    assert response.request.path == '/home'
+
+    #Check that correct login message is displayed on the frontend
+    assert b'You Have Been Logged In!' in response.data
+
+    #Check that the user login has been aunthenticated
+    assert current_user.is_authenticated is True
+
+    #Check that correct user has been aunthenticated
+    assert current_user.email == 'test@example.com'
+    assert current_user.username == 'testuser'
+
+    #Try to register while logged in
+    response = client.post('/register', data=valid_user, follow_redirects=True)
+
+    #Check that user is redirected to /home if attempting to register while logged in
+    assert response.request.path == '/home'
+
+    #Check that corrrect message is displayed
+    assert b'You Must Logout to Register a New User.' in response.data
 
 
 def test_invalid_password(client):

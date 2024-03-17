@@ -18,3 +18,11 @@ def test_about_route(client):
 
     #Make sure there are no redirects
     assert response.request.path == '/about'
+
+
+def test_non_existing_route(client):
+    '''Test for routes that don't exists'''
+
+    response = client.get('/non_existing_route', follow_redirects=True)
+
+    assert b'ERROR' in response.data
