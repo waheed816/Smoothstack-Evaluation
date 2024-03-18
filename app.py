@@ -8,7 +8,7 @@ from wtforms.validators import DataRequired, EqualTo, Length, Email
 from wtforms_validators import AlphaNumeric
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from sqlalchemy import MetaData
+from sqlalchemy import MetaData, desc
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, login_user, LoginManager
 from flask_login import logout_user, current_user #, login_required
@@ -99,11 +99,19 @@ with app.app_context():
 @app.route("/")
 @app.route("/home")
 def index():
-    """Function rendering index.html template for default route"""
-    blogs = Blogs.query.order_by(Blogs.date_posted)
+    """Function rendering homepage with blogs from oldest to newest"""
+    blogs = Blogs.query.order_by(Blogs.id)
     users_with_blogs = Users.query.filter(Users.blogs.any()).all()
     #print(">>>", users_with_blogs[0].username)
     return render_template("index.html", blogs=blogs, users_with_blogs=users_with_blogs)
+
+@app.route("/latest_blogs")
+def latest_blogs():
+    '''Function rendering blogs from newest to oldest'''
+    blogs = Blogs.query.order_by(desc(Blogs.id))
+    users_with_blogs = Users.query.filter(Users.blogs.any()).all()
+    #print(">>>", users_with_blogs[0].username)
+    return render_template("latest_blogs.html", blogs=blogs, users_with_blogs=users_with_blogs)
 
 #Create route for about page
 @app.route("/about")
@@ -290,7 +298,7 @@ def create_blog():
         db.session.commit()
 
         flash("Blog Post Submitted Successfully!")
-        return redirect(url_for('index'))
+        return redirect(url_for('latest_blogs'))
 
     return render_template("create-blog.html", form=form)
 

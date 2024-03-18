@@ -14,7 +14,7 @@ def test_about_route(client):
     response = client.get('/about', follow_redirects=True)
 
     #Check that front end is displaying correct page
-    assert b'About Page for Flask Blog' in response.data
+    assert b'About Blogs' in response.data
 
     #Make sure there are no redirects
     assert response.request.path == '/about'

@@ -82,6 +82,9 @@ def test_creating_a_valid_blog(client):
     response = client.post('/create-blog', data=valid_blog_data, follow_redirects=True)
     assert b'Blog Post Submitted Successfully!' in response.data
 
+    #Check for redirection to Latest Blogs page
+    assert response.request.path == '/latest_blogs'
+
     #Check if the blog was added to the database
     with app.app_context():
         blog = Blogs.query.filter_by(blog_title=unique_title).first()

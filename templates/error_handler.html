@@ -1,14 +1,21 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<center>
-    <div class="alert alert-danger alert-link" styrole="alert" style="width: 35%; font-size: larger;">
-        <center>{{code}} ERROR</center>
-        <center>{{name|upper}}</center>
 
-    </div>
-    <div class="alert alert-danger alert-link" role="alert" style="width: 35%; font-size: larger;">
-        <center>{{description}}</center>
-    </div>
-</center>
+<div class="border container shadow p-4" style="background-color: white;">
+
+        <div class="alert alert-danger alert-link" styrole="alert" style="font-size: larger;">
+            <div>
+                <center>
+                    {{code}} ERROR: {{name|upper}}
+                </center>
+            </div>
+        </div>
+        <div class="alert alert-danger alert-link" role="alert" style="font-size: larger;">
+            <center>
+                {{description}}
+
+            </center>
+        </div>
+</div>
 {% endblock %}

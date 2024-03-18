@@ -10,37 +10,36 @@
             </div>
     {% endfor %}
 
-    {% for blog in blogs %}
-        <div class="border container shadow p-3" style="background-color: white;">
+    <div class="border container shadow p-4" style="background-color: white;">
+            <h2 style="border-bottom: 1px solid black;">Latest Blogs</h2>
+                <br/>
+                {% for blog in blogs %}
+                    <div class="border container shadow p-4" style="background-color: white;">
+                            {% set author = None %}
+                            {% for user in users_with_blogs %}
+                                {{ user[blog.author_id] }}
+                                {% if user.id == blog.author_id %}
+                                    {% set author = user.username %}
+                                    <div style= "font-size: small; border-bottom: 1px solid darkgray;">
+                                            <strong style="text-transform: uppercase;">{{ author }}</strong>&nbsp;&nbsp;
+                                            {{ blog.date_posted.strftime('%B %d, %Y') }}
+                                    </div>
+                                    {% set break_loop = true %}
+                                {% endif %}
+                            {% endfor %}
+                                <div style="margin-top: 8px;">
+                                    <h2 style="margin-bottom: 0; padding-bottom: 0; text-transform: capitalize;"> {{ blog.blog_title }} </h2>
+                                </div>
 
-            {% set author = None %}
-            {% for user in users_with_blogs %}
-                {{ user[blog.author_id] }}
-                {% if user.id == blog.author_id %}
-                    {% set author = user.username %}
-                    <div style= "font-size: small; border-bottom: 1px solid darkgray;">
-                            <strong style="text-transform: uppercase;">{{ author }}</strong>&nbsp;&nbsp;
-                            {{ blog.date_posted.strftime('%B %d, %Y') }}
+                                <div style="white-space: pre-line; margin-top: -13px;">
+                                    {{ blog.blog_content.strip() | safe }}
+                                </div>
+
                     </div>
-                    {% set break_loop = true %}
-                {% endif %}
-            {% endfor %}
-                <div style="margin-top: 8px;">
-                    <h2 style="margin-bottom: 0; padding-bottom: 0; text-transform: capitalize;"> {{ blog.blog_title }} </h2>
-                </div>
-
-                <div style="white-space: pre-line; margin-top: -13px;">
-                    {{ blog.blog_content.strip() | safe }}
-                </div>
-
-
-
-        </div>
-        <br/>
-    {% endfor %}
-        <br/>
-        <br/>
-
-
+                    <br/>
+                {% endfor %}
+            </div>
+            <br/>
+            <br/>
 
 {% endblock %}

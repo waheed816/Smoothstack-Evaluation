@@ -26,7 +26,7 @@ python -m pytest -v
 pytest --cov=app
 ```
 
-## Run the Following Command to Check Which Lines of Code Were Not Covered
+## Run the Following Command to Check Which Lines of Code Were Not Covered in testing
 
 ```
 pytest --cov=app --cov-report term-missing

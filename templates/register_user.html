@@ -16,6 +16,13 @@
 
     <div class="border container shadow p-4" style="background-color: white;">
 
+        {% for message in get_flashed_messages() %}
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+        {% endfor %}
+
         <h2 style="border-bottom: 1px solid black;">Join Today</h2>
         <br/>
 
@@ -93,9 +100,13 @@
             {{form.submit(
                 class="btn btn-light", style="border-color: rgba(82,186,202,255); color: rgba(82,186,202,255); margin-top: 13px;") }}
             <br/>
-            <br/>
+
         </form>
     </div>
+    <hr/>
+    Already Have An Account? &nbsp;&nbsp; <a href="{{url_for('login')}}" style="text-decoration: none;">Sign In</a>
+    <br/>
+    <br/>
     <br/>
 
     {% endif %}
