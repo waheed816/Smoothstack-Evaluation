@@ -23,6 +23,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///flask_blog.db'
 #Add Secret Key to Guard against CSRF attacks using forms
 app.config['SECRET_KEY'] = "my secret key"
 
+
 app.config['ALLOW_RESTRICTED_ACCOUNTS'] = False
 
 #For Migrate Files Naming conventions
